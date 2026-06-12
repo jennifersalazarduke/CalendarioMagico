@@ -135,30 +135,45 @@ export function AuthProvider({ children: reactChildren }: { children: ReactNode 
   const createFamily = useCallback(async (name: string) => {
     if (!state.user) return
 
-    const { data: family } = await supabase
+    // Insert family without .select() — RLS SELECT requires profile.family_id
+    // which isn't set yet, so .select().single() would return null
+    const { data: inserted, error: insertErr } = await supabase
       .from("families")
       .insert({ name, created_by: state.user.id })
-      .select()
+      .select("id")
       .single()
 
-    if (family) {
-      await supabase
-        .from("profiles")
-        .update({ family_id: family.id })
-        .eq("id", state.user.id)
-
-      // Insert default rewards
-      const defaultRewards = [
-        { family_id: family.id, name_es: "Elegir un postre", icon: "cake", price: 5 },
-        { family_id: family.id, name_es: "Tiempo extra de juego", icon: "game", price: 8 },
-        { family_id: family.id, name_es: "Escoger una película", icon: "movie", price: 10 },
-        { family_id: family.id, name_es: "Actividad especial con mamá", icon: "heart", price: 15 },
-        { family_id: family.id, name_es: "Pegatina sorpresa", icon: "star", price: 3 },
-      ]
-      await supabase.from("rewards").insert(defaultRewards)
-
-      await loadUserData(state.user.id)
+    // If RLS blocks the select, fall back to querying by created_by
+    let familyId = inserted?.id
+    if (!familyId) {
+      const { data: found } = await supabase
+        .from("families")
+        .select("id")
+        .eq("created_by", state.user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single()
+      familyId = found?.id
     }
+
+    if (!familyId) return
+
+    // Update profile FIRST so subsequent RLS checks pass
+    await supabase
+      .from("profiles")
+      .update({ family_id: familyId })
+      .eq("id", state.user.id)
+
+    const defaultRewards = [
+      { family_id: familyId, name_es: "Elegir un postre", icon: "cake", price: 5 },
+      { family_id: familyId, name_es: "Tiempo extra de juego", icon: "game", price: 8 },
+      { family_id: familyId, name_es: "Escoger una película", icon: "movie", price: 10 },
+      { family_id: familyId, name_es: "Actividad especial con mamá", icon: "heart", price: 15 },
+      { family_id: familyId, name_es: "Pegatina sorpresa", icon: "star", price: 3 },
+    ]
+    await supabase.from("rewards").insert(defaultRewards)
+
+    await loadUserData(state.user.id)
   }, [supabase, state.user, loadUserData])
 
   const joinFamily = useCallback(async (inviteCode: string) => {
