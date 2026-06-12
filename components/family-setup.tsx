@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/auth-context"
 type Step = "choose" | "create" | "join" | "add-child"
 
 export function FamilySetup() {
-  const { createFamily, joinFamily, addChild, family, children } = useAuth()
+  const { setupFamily, joinFamily, addChild, family, children } = useAuth()
   const [step, setStep] = useState<Step>(family ? "add-child" : "choose")
   const [familyName, setFamilyName] = useState("")
   const [inviteCode, setInviteCode] = useState("")
@@ -16,10 +16,12 @@ export function FamilySetup() {
 
   const handleCreateFamily = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!childName.trim()) return
     setLoading(true)
-    await createFamily(familyName || "Mi Familia")
+    setError("")
+    const { error } = await setupFamily(familyName || "Mi Familia", childName.trim())
+    if (error) setError(error)
     setLoading(false)
-    setStep("add-child")
   }
 
   const handleJoinFamily = async (e: React.FormEvent) => {
@@ -73,22 +75,34 @@ export function FamilySetup() {
         <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl p-8 max-w-sm w-full">
           <div className="text-center mb-6">
             <div className="text-5xl mb-2">🏠</div>
-            <h2 className="text-xl font-bold">Nombre de tu familia</h2>
+            <h2 className="text-xl font-bold">Configurá tu familia</h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              Nombre de la familia y del primer niño/a
+            </p>
           </div>
           <form onSubmit={handleCreateFamily} className="space-y-4">
             <input
               type="text"
-              placeholder="Ej: Familia Salazar"
+              placeholder="Nombre de la familia (ej: Familia Salazar)"
               value={familyName}
               onChange={e => setFamilyName(e.target.value)}
               className="w-full px-4 py-3 rounded-2xl border-2 border-medium-pink/30 focus:border-strong-pink focus:outline-none"
             />
+            <input
+              type="text"
+              placeholder="Nombre del niño/a"
+              value={childName}
+              onChange={e => setChildName(e.target.value)}
+              required
+              className="w-full px-4 py-3 rounded-2xl border-2 border-medium-pink/30 focus:border-strong-pink focus:outline-none"
+            />
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !childName.trim()}
               className="w-full py-3 bg-strong-pink text-white font-bold rounded-2xl hover:bg-strong-pink/90 disabled:opacity-50"
             >
-              {loading ? "Creando..." : "Crear familia"}
+              {loading ? "Creando..." : "Crear familia y empezar"}
             </button>
             <button type="button" onClick={() => setStep("choose")} className="w-full text-sm text-muted-foreground hover:underline">
               Volver
@@ -133,7 +147,7 @@ export function FamilySetup() {
     )
   }
 
-  // add-child step
+  // add-child step (only reached via join flow or if family already exists)
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pastel-pink/30 via-background to-soft-purple/20 p-4">
       <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl p-8 max-w-sm w-full">

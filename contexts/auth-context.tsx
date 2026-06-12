@@ -20,7 +20,7 @@ interface AuthContextType extends AuthState {
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signInWithGoogle: () => Promise<void>
   signOut: () => Promise<void>
-  createFamily: (name: string) => Promise<void>
+  setupFamily: (familyName: string, childName: string) => Promise<{ error: string | null }>
   joinFamily: (inviteCode: string) => Promise<{ error: string | null }>
   addChild: (name: string) => Promise<void>
   setActiveChild: (child: Child) => void
@@ -132,48 +132,21 @@ export function AuthProvider({ children: reactChildren }: { children: ReactNode 
     await supabase.auth.signOut()
   }, [supabase])
 
-  const createFamily = useCallback(async (name: string) => {
-    if (!state.user) return
+  const setupFamily = useCallback(async (familyName: string, childName: string): Promise<{ error: string | null }> => {
+    if (!state.user) return { error: "No autenticado" }
 
-    // Insert family without .select() — RLS SELECT requires profile.family_id
-    // which isn't set yet, so .select().single() would return null
-    const { data: inserted, error: insertErr } = await supabase
-      .from("families")
-      .insert({ name, created_by: state.user.id })
-      .select("id")
-      .single()
+    const { data, error } = await supabase.rpc("setup_family", {
+      p_family_name: familyName || "Mi Familia",
+      p_child_name: childName,
+    })
 
-    // If RLS blocks the select, fall back to querying by created_by
-    let familyId = inserted?.id
-    if (!familyId) {
-      const { data: found } = await supabase
-        .from("families")
-        .select("id")
-        .eq("created_by", state.user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single()
-      familyId = found?.id
-    }
-
-    if (!familyId) return
-
-    // Update profile FIRST so subsequent RLS checks pass
-    await supabase
-      .from("profiles")
-      .update({ family_id: familyId })
-      .eq("id", state.user.id)
-
-    const defaultRewards = [
-      { family_id: familyId, name_es: "Elegir un postre", icon: "cake", price: 5 },
-      { family_id: familyId, name_es: "Tiempo extra de juego", icon: "game", price: 8 },
-      { family_id: familyId, name_es: "Escoger una película", icon: "movie", price: 10 },
-      { family_id: familyId, name_es: "Actividad especial con mamá", icon: "heart", price: 15 },
-      { family_id: familyId, name_es: "Pegatina sorpresa", icon: "star", price: 3 },
-    ]
-    await supabase.from("rewards").insert(defaultRewards)
+    if (error) return { error: error.message }
 
     await loadUserData(state.user.id)
+    if (data?.child_id) {
+      localStorage.setItem("active-child-id", data.child_id)
+    }
+    return { error: null }
   }, [supabase, state.user, loadUserData])
 
   const joinFamily = useCallback(async (inviteCode: string) => {
@@ -236,7 +209,7 @@ export function AuthProvider({ children: reactChildren }: { children: ReactNode 
       signIn,
       signInWithGoogle,
       signOut,
-      createFamily,
+      setupFamily,
       joinFamily,
       addChild,
       setActiveChild: setActiveChildFn,
