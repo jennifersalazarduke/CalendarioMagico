@@ -56,7 +56,7 @@ function getWeekDates() {
 }
 
 export function useSupabaseData() {
-  const { activeChild, family } = useAuth()
+  const { activeChild, family, refreshData: refreshAuth } = useAuth()
   const supabase = createClient()
 
   const [routines, setRoutines] = useState<Routine[]>([])
@@ -213,6 +213,40 @@ export function useSupabaseData() {
     await loadAll()
   }, [activeChild, supabase, loadAll])
 
+  const updateChildName = useCallback(async (name: string) => {
+    if (!activeChild) return
+    await supabase.from("children").update({ name }).eq("id", activeChild.id)
+    await refreshAuth()
+  }, [activeChild, supabase, refreshAuth])
+
+  const updateChildTheme = useCallback(async (theme: "pink" | "blue") => {
+    if (!activeChild) return
+    await supabase.from("children").update({ theme }).eq("id", activeChild.id)
+    await refreshAuth()
+  }, [activeChild, supabase, refreshAuth])
+
+  const resetTokens = useCallback(async () => {
+    if (!activeChild || tokenBalance === 0) return
+    await supabase.from("token_transactions").insert({
+      child_id: activeChild.id,
+      amount: -tokenBalance,
+      reason: "consequence",
+      reference_id: "reset",
+    })
+    await loadAll()
+  }, [activeChild, tokenBalance, supabase, loadAll])
+
+  const resetAllData = useCallback(async () => {
+    if (!activeChild) return
+    await supabase.from("completions").delete().eq("child_id", activeChild.id)
+    await supabase.from("token_transactions").delete().eq("child_id", activeChild.id)
+    const routineIds = routines.map(r => r.id)
+    if (routineIds.length > 0) {
+      await supabase.from("activities").delete().in("routine_id", routineIds)
+    }
+    await loadAll()
+  }, [activeChild, routines, supabase, loadAll])
+
   const addActivity = useCallback(async (routineBlockId: string, name: string, icon: string) => {
     const routine = routines.find(r => r.block_id === routineBlockId)
     if (!routine) return
@@ -264,6 +298,10 @@ export function useSupabaseData() {
     removeActivity,
     addReward,
     removeReward,
+    updateChildName,
+    updateChildTheme,
+    resetTokens,
+    resetAllData,
     refreshData: loadAll,
     today,
   }

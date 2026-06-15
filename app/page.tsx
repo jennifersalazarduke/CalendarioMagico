@@ -12,6 +12,7 @@ import { CelebrationModal } from "@/components/celebration-modal"
 import { RobotMascota } from "@/components/robot-mascota"
 import { SettingsPanel } from "@/components/settings-panel"
 import { ConsecuenciasTab } from "@/components/consecuencias-tab"
+import type { RoutineBlock as RoutineBlockType } from "@/hooks/use-supabase-data"
 
 // Re-export types for backward compatibility with child components
 export type { RoutineBlock, DayProgress } from "@/hooks/use-supabase-data"
@@ -89,6 +90,31 @@ function CalendarioContent() {
       setShowCelebration(true)
     }
   }, [data, total])
+
+  const handleRoutinesChange = useCallback(async (newRoutines: RoutineBlockType[]) => {
+    const snapshot = data.routineBlocks
+
+    for (const newRoutine of newRoutines) {
+      const current = snapshot.find(r => r.id === newRoutine.id)
+      if (!current) continue
+
+      const currentIds = new Set(current.activities.map(a => a.id))
+      const newIds = new Set(newRoutine.activities.map(a => a.id))
+
+      for (const act of newRoutine.activities) {
+        if (!currentIds.has(act.id)) {
+          const actAny = act as typeof act & { nameEs?: string }
+          await data.addActivity(newRoutine.id, actAny.nameEs ?? act.name, act.icon)
+        }
+      }
+
+      for (const act of current.activities) {
+        if (!newIds.has(act.id)) {
+          await data.removeActivity(act.id)
+        }
+      }
+    }
+  }, [data])
 
   const handleRedeemReward = useCallback(async (rewardId: string, price: number) => {
     await data.redeemReward(rewardId, price)
@@ -256,17 +282,17 @@ function CalendarioContent() {
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         childName={childName}
-        onNameChange={() => {}}
+        onNameChange={data.updateChildName}
         theme={theme}
-        onThemeChange={() => {}}
+        onThemeChange={data.updateChildTheme}
         routines={data.routineBlocks.map(r => ({
           ...r,
           activities: r.activities.map(a => ({ ...a, nameEs: a.name, nameEn: a.name })),
         }))}
-        onRoutinesChange={() => {}}
+        onRoutinesChange={handleRoutinesChange}
         tokens={data.tokenBalance}
-        onResetTokens={() => {}}
-        onResetAllData={() => {}}
+        onResetTokens={data.resetTokens}
+        onResetAllData={async () => { await data.resetAllData(); setShowSettings(false) }}
       />
 
       <CelebrationModal
