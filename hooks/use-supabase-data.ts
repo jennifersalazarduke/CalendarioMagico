@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
 import type { Routine, DbActivity, Completion, TokenTransaction, DbReward, Redemption } from "@/lib/supabase/types"
@@ -65,13 +65,18 @@ export function useSupabaseData() {
   const [tokenBalance, setTokenBalance] = useState(0)
   const [rewards, setRewards] = useState<DbReward[]>([])
   const [loading, setLoading] = useState(true)
+  const hasLoadedRef = useRef(false)
 
   const today = getToday()
 
   const loadAll = useCallback(async () => {
     if (!activeChild || !family) return
 
-    setLoading(true)
+    // Solo mostrar el loader de pantalla completa en la primera carga.
+    // Los refrescos posteriores (agregar/quitar actividad) no deben desmontar la UI.
+    if (!hasLoadedRef.current) {
+      setLoading(true)
+    }
 
     const weekDates = getWeekDates()
 
@@ -103,6 +108,7 @@ export function useSupabaseData() {
       setActivities(acts || [])
     }
 
+    hasLoadedRef.current = true
     setLoading(false)
   }, [activeChild, family, supabase])
 
