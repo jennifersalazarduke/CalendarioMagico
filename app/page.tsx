@@ -52,7 +52,7 @@ function getDayOfWeek(): number {
 }
 
 function CalendarioContent() {
-  const { activeChild, signOut } = useAuth()
+  const { activeChild, user, signOut } = useAuth()
   const data = useSupabaseData()
 
   const [showCelebration, setShowCelebration] = useState(false)
@@ -312,6 +312,8 @@ function CalendarioContent() {
         tokens={data.tokenBalance}
         onResetTokens={data.resetTokens}
         onResetAllData={async () => { await data.resetAllData(); setShowSettings(false) }}
+        userEmail={user?.email}
+        onSignOut={signOut}
       />
 
       <CelebrationModal

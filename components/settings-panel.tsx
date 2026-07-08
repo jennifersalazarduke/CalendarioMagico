@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, Settings, User, Palette, ListChecks, Check, Database, AlertTriangle, Coins, ChevronUp, ChevronDown, GripVertical } from "lucide-react"
+import { X, Settings, User, Palette, ListChecks, Check, Database, AlertTriangle, Coins, ChevronUp, ChevronDown, GripVertical, LogOut } from "lucide-react"
 import type { RoutineBlock, Activity } from "@/app/page"
 import { getActivityIcon, availableIcons } from "./activity-icons"
 
@@ -68,6 +68,8 @@ interface SettingsPanelProps {
   tokens: number
   onResetTokens: () => void
   onResetAllData: () => void
+  userEmail?: string
+  onSignOut?: () => void
 }
 
 export function SettingsPanel({
@@ -82,6 +84,8 @@ export function SettingsPanel({
   tokens,
   onResetTokens,
   onResetAllData,
+  userEmail,
+  onSignOut,
 }: SettingsPanelProps) {
   const [activeTab, setActiveTab] = useState<"name" | "theme" | "routines" | "data">("name")
   const [showConfirmResetTokens, setShowConfirmResetTokens] = useState(false)
@@ -499,7 +503,34 @@ export function SettingsPanel({
               <p className="text-muted-foreground text-sm">
                 Administra los datos guardados del calendario. Usa estas opciones con cuidado.
               </p>
-              
+
+              {/* Session info + sign out */}
+              <div className="border-2 border-border rounded-2xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-soft-purple/40 flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-foreground">Sesión activa</p>
+                    <p className="text-sm text-muted-foreground mt-1 truncate">
+                      {userEmail || "Sin correo detectado"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Para ver las mismas rutinas en todos los dispositivos, entra con este mismo correo.
+                    </p>
+                    {onSignOut && (
+                      <button
+                        onClick={onSignOut}
+                        className="mt-3 px-4 py-2 rounded-xl font-medium bg-soft-purple/40 text-foreground hover:bg-soft-purple/60 transition-all flex items-center gap-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Cerrar sesión
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               {/* Current tokens display */}
               <div className="p-4 bg-muted rounded-2xl">
                 <div className="flex items-center gap-3">
