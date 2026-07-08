@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Coins, Minus, FileText, Clock, AlertCircle } from "lucide-react"
+import { Coins, Minus, Plus, FileText, Clock, AlertCircle, Gift } from "lucide-react"
 
 // Deduction entry type
 export interface Deduction {
@@ -12,6 +12,7 @@ export interface Deduction {
   note?: string
   timestamp: string
   date: string
+  kind?: "deduct" | "gift"
 }
 
 // Preset reasons
@@ -30,6 +31,7 @@ const STORAGE_KEY_DEDUCTIONS = "calendario-deductions"
 interface ConsecuenciasTabProps {
   tokens: number
   onSubtractTokens: (amount: number) => void
+  onGiftTokens?: (amount: number) => void
   childName: string
 }
 
@@ -42,7 +44,7 @@ function getWeekStartDate(): string {
   return monday.toISOString().split("T")[0]
 }
 
-export function ConsecuenciasTab({ tokens, onSubtractTokens, childName }: ConsecuenciasTabProps) {
+export function ConsecuenciasTab({ tokens, onSubtractTokens, onGiftTokens, childName }: ConsecuenciasTabProps) {
   const [deductions, setDeductions] = useState<Deduction[]>([])
   const [amount, setAmount] = useState(1)
   const [reason, setReason] = useState("")
@@ -63,11 +65,11 @@ export function ConsecuenciasTab({ tokens, onSubtractTokens, childName }: Consec
     localStorage.setItem(STORAGE_KEY_DEDUCTIONS, JSON.stringify(deductions))
   }, [deductions])
 
-  // Calculate weekly deductions
+  // Calculate weekly deductions (los regalos no cuentan como descuento)
   const weeklyDeductions = useCallback(() => {
     const weekStart = getWeekStartDate()
     return deductions
-      .filter((d) => d.date >= weekStart)
+      .filter((d) => d.date >= weekStart && d.kind !== "gift")
       .reduce((sum, d) => sum + d.amount, 0)
   }, [deductions])
 
@@ -127,6 +129,23 @@ export function ConsecuenciasTab({ tokens, onSubtractTokens, childName }: Consec
     }
   }, [tokens, onSubtractTokens])
 
+  // Quick gift
+  const handleQuickGift = useCallback((quickAmount: number) => {
+    if (!onGiftTokens) return
+
+    const newEntry: Deduction = {
+      id: `gift-${Date.now()}`,
+      amount: quickAmount,
+      reason: "Regalo de mama o papa",
+      timestamp: new Date().toISOString(),
+      date: new Date().toISOString().split("T")[0],
+      kind: "gift",
+    }
+
+    setDeductions((prev) => [newEntry, ...prev])
+    onGiftTokens(quickAmount)
+  }, [onGiftTokens])
+
   // Format date for display
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
@@ -174,6 +193,30 @@ export function ConsecuenciasTab({ tokens, onSubtractTokens, childName }: Consec
         <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl text-amber-800 text-sm flex items-center gap-2">
           <AlertCircle className="w-5 h-5 shrink-0" />
           <span>El saldo no puede ser menor a cero.</span>
+        </div>
+      )}
+
+      {/* Quick Gift Buttons */}
+      {onGiftTokens && (
+        <div className="bg-card border-2 border-reward-gold/50 rounded-3xl p-5 shadow-md">
+          <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">
+            <Gift className="w-5 h-5 text-reward-gold" />
+            Regalar Tokencitos
+          </h3>
+          <p className="text-xs text-muted-foreground mb-3">
+            Para premiar algo especial fuera de las rutinas.
+          </p>
+          <div className="grid grid-cols-4 gap-3">
+            {[1, 2, 5, 10].map((quickAmount) => (
+              <button
+                key={quickAmount}
+                onClick={() => handleQuickGift(quickAmount)}
+                className="py-4 px-2 rounded-2xl font-bold text-lg bg-reward-gold/15 text-amber-600 hover:bg-reward-gold/30 transition-all active:scale-95"
+              >
+                +{quickAmount}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -329,7 +372,9 @@ export function ConsecuenciasTab({ tokens, onSubtractTokens, childName }: Consec
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-bold text-foreground flex items-center gap-2">
-                      <span className="text-primary">-{deduction.amount}</span>
+                      <span className={deduction.kind === "gift" ? "text-green-600" : "text-primary"}>
+                        {deduction.kind === "gift" ? "+" : "-"}{deduction.amount}
+                      </span>
                       Tokencitos
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">

@@ -251,6 +251,18 @@ export function useSupabaseData() {
     await loadAll()
   }, [activeChild, tokenBalance, supabase, loadAll])
 
+  const giftTokens = useCallback(async (amount: number) => {
+    if (!activeChild || amount <= 0) return
+    const { error } = await supabase.from("token_transactions").insert({
+      child_id: activeChild.id,
+      amount,
+      reason: "gift",
+      reference_id: null,
+    })
+    if (error) console.error("giftTokens:", error.message)
+    await loadAll()
+  }, [activeChild, supabase, loadAll])
+
   const resetWeek = useCallback(async () => {
     if (!activeChild) return
     const dates = getWeekDates()
@@ -366,6 +378,7 @@ export function useSupabaseData() {
     updateChildName,
     updateChildTheme,
     resetTokens,
+    giftTokens,
     resetWeek,
     awardBonus,
     resetAllData,

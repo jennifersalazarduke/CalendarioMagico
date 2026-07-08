@@ -292,6 +292,7 @@ function CalendarioContent() {
           <ConsecuenciasTab
             tokens={data.tokenBalance}
             onSubtractTokens={(amount) => data.subtractTokens(amount, "manual")}
+            onGiftTokens={(amount) => data.giftTokens(amount)}
             childName={childName}
           />
         )}
