@@ -281,7 +281,7 @@ function CalendarioContent() {
             tokens={data.tokenBalance}
             onRedeem={handleRedeemReward}
             onAddReward={(r) => data.addReward(r.nameEs, r.icon, r.price)}
-            onUpdateReward={() => {}}
+            onUpdateReward={(id, changes) => data.updateReward(id, changes)}
             onDeleteReward={(id) => data.removeReward(id)}
           />
         )}

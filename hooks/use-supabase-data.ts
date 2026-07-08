@@ -308,6 +308,18 @@ export function useSupabaseData() {
     await loadAll()
   }, [family, supabase, loadAll])
 
+  const updateReward = useCallback(async (rewardId: string, changes: { nameEs?: string; icon?: string; price?: number }) => {
+    const patch: Record<string, string | number> = {}
+    if (changes.nameEs !== undefined) patch.name_es = changes.nameEs
+    if (changes.icon !== undefined) patch.icon = changes.icon
+    if (changes.price !== undefined) patch.price = changes.price
+    if (Object.keys(patch).length === 0) return
+
+    const { error } = await supabase.from("rewards").update(patch).eq("id", rewardId)
+    if (error) console.error("updateReward:", error.message)
+    await loadAll()
+  }, [supabase, loadAll])
+
   const removeReward = useCallback(async (rewardId: string) => {
     await supabase.from("rewards").update({ is_active: false }).eq("id", rewardId)
     await loadAll()
@@ -326,6 +338,7 @@ export function useSupabaseData() {
     removeActivity,
     updateActivityOrder,
     addReward,
+    updateReward,
     removeReward,
     updateChildName,
     updateChildTheme,
