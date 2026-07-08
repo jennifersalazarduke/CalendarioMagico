@@ -428,3 +428,124 @@ ActivityIcons.plant = ({ className }) => (
     <ellipse cx="20" cy="36" rx="6" ry="4" fill="#4CAF50" transform="rotate(-20 20 36)" />
   </svg>
 )
+
+// New activity icons — body, learning & night routines
+ActivityIcons.sports = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <circle cx="32" cy="32" r="22" fill="#FFFFFF" stroke="#5D4037" strokeWidth="2" />
+    <polygon points="32,22 41,29 38,40 26,40 23,29" fill="#5D4037" />
+    <path d="M32 22 L32 10 M41 29 L53 26 M38 40 L46 50 M26 40 L18 50 M23 29 L11 26" stroke="#5D4037" strokeWidth="2" />
+    <circle cx="24" cy="18" r="4" fill="#FCE4EC" opacity="0.7" />
+  </svg>
+)
+
+ActivityIcons.vitamins = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <rect x="14" y="20" width="24" height="34" rx="6" fill="#FFE082" />
+    <rect x="14" y="12" width="24" height="10" rx="3" fill="#F48FB1" />
+    <rect x="19" y="30" width="14" height="14" rx="2" fill="#FFF8E1" />
+    <path d="M26 32 L26 42 M21 37 L31 37" stroke="#EC407A" strokeWidth="3" strokeLinecap="round" />
+    <ellipse cx="48" cy="44" rx="8" ry="5" transform="rotate(-30 48 44)" fill="#B39DDB" />
+    <path d="M44 46 L52 41" stroke="#FFFFFF" strokeWidth="2" />
+  </svg>
+)
+
+ActivityIcons["wash-face"] = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <circle cx="32" cy="34" r="18" fill="#FFCCBC" />
+    <circle cx="26" cy="30" r="2" fill="#5D4037" />
+    <circle cx="38" cy="30" r="2" fill="#5D4037" />
+    <path d="M27 40 Q32 44 37 40" stroke="#5D4037" strokeWidth="2" fill="none" strokeLinecap="round" />
+    <circle cx="14" cy="18" r="5" fill="#B3E5FC" opacity="0.9" />
+    <circle cx="50" cy="14" r="4" fill="#B3E5FC" opacity="0.9" />
+    <circle cx="44" cy="22" r="3" fill="#E1F5FE" />
+    <circle cx="20" cy="10" r="3" fill="#E1F5FE" />
+    <circle cx="52" cy="26" r="2" fill="#B3E5FC" />
+  </svg>
+)
+
+ActivityIcons.english = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <rect x="6" y="12" width="30" height="22" rx="6" fill="#81D4FA" />
+    <polygon points="14,34 14,42 22,34" fill="#81D4FA" />
+    <text x="12" y="28" fontSize="12" fill="#FFFFFF" fontWeight="bold">EN</text>
+    <rect x="28" y="26" width="30" height="22" rx="6" fill="#F48FB1" />
+    <polygon points="50,48 50,56 42,48" fill="#F48FB1" />
+    <text x="34" y="42" fontSize="12" fill="#FFFFFF" fontWeight="bold">ES</text>
+  </svg>
+)
+
+ActivityIcons.reading = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <path d="M8 16 Q20 10 32 16 L32 50 Q20 44 8 50 Z" fill="#C8E6C9" />
+    <path d="M56 16 Q44 10 32 16 L32 50 Q44 44 56 50 Z" fill="#A5D6A7" />
+    <text x="13" y="34" fontSize="11" fill="#2E7D32" fontWeight="bold">A</text>
+    <text x="38" y="34" fontSize="11" fill="#1B5E20" fontWeight="bold">B</text>
+    <rect x="12" y="38" width="14" height="2.5" rx="1" fill="#81C784" />
+    <rect x="38" y="38" width="14" height="2.5" rx="1" fill="#66BB6A" />
+  </svg>
+)
+
+ActivityIcons.writing = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <rect x="10" y="10" width="36" height="44" rx="4" fill="#FFF8E1" />
+    <path d="M16 22 L40 22 M16 30 L36 30 M16 38 L30 38" stroke="#FFCC80" strokeWidth="2.5" strokeLinecap="round" />
+    <rect x="38" y="18" width="7" height="26" rx="1" transform="rotate(35 42 30)" fill="#FFE082" />
+    <polygon points="30,50 36,54 28,56" fill="#FFCCBC" transform="rotate(10 32 52)" />
+    <path d="M16 46 Q22 42 28 46" stroke="#F48FB1" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+  </svg>
+)
+
+ActivityIcons.table = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <ellipse cx="32" cy="30" rx="26" ry="10" fill="#BCAAA4" />
+    <rect x="10" y="32" width="5" height="22" rx="2" fill="#A1887F" />
+    <rect x="49" y="32" width="5" height="22" rx="2" fill="#A1887F" />
+    <circle cx="32" cy="28" r="8" fill="#FFFFFF" />
+    <circle cx="32" cy="28" r="5" fill="#FCE4EC" />
+    <rect x="14" y="24" width="3" height="9" rx="1.5" fill="#E0E0E0" />
+    <rect x="47" y="24" width="3" height="9" rx="1.5" fill="#E0E0E0" />
+  </svg>
+)
+
+ActivityIcons.paint = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <path d="M32 8 C16 8 8 20 8 32 C8 46 18 54 28 54 C34 54 34 48 32 44 C30 40 34 36 40 38 C52 42 58 32 54 22 C50 12 42 8 32 8 Z" fill="#FFF3E0" stroke="#FFCC80" strokeWidth="2" />
+    <circle cx="20" cy="24" r="4" fill="#EF5350" />
+    <circle cx="32" cy="18" r="4" fill="#FFEB3B" />
+    <circle cx="44" cy="24" r="4" fill="#42A5F5" />
+    <circle cx="18" cy="36" r="4" fill="#66BB6A" />
+  </svg>
+)
+
+ActivityIcons.story = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <path d="M10 18 Q22 12 32 18 L32 48 Q22 42 10 48 Z" fill="#B39DDB" />
+    <path d="M54 18 Q42 12 32 18 L32 48 Q42 42 54 48 Z" fill="#D1C4E9" />
+    <path d="M46 22 C42 23 40 27 40 31 C40 35 44 38 48 37 C44 37 42 33 42 29 C42 26 44 23 46 22 Z" fill="#FFE082" />
+    <circle cx="18" cy="26" r="1.5" fill="#FFE082" />
+    <circle cx="24" cy="32" r="1.5" fill="#FFE082" />
+    <circle cx="16" cy="38" r="1.5" fill="#FFE082" />
+  </svg>
+)
+
+ActivityIcons.hug = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <circle cx="22" cy="20" r="8" fill="#FFCCBC" />
+    <circle cx="42" cy="20" r="8" fill="#FFE0B2" />
+    <path d="M10 52 Q10 34 22 34 Q30 34 32 42 Q34 34 42 34 Q54 34 54 52 Z" fill="#F48FB1" />
+    <path d="M14 40 Q32 52 50 40" stroke="#EC407A" strokeWidth="3" fill="none" strokeLinecap="round" />
+    <path d="M32 26 C30 23 26 23 26 26 C26 29 32 32 32 32 C32 32 38 29 38 26 C38 23 34 23 32 26 Z" fill="#EF5350" />
+  </svg>
+)
+
+ActivityIcons.dance = ({ className }) => (
+  <svg className={className} viewBox="0 0 64 64" fill="none">
+    <circle cx="28" cy="14" r="7" fill="#FFCCBC" />
+    <path d="M28 22 Q22 30 26 38 L22 52 M26 38 L34 52" stroke="#F48FB1" strokeWidth="5" strokeLinecap="round" fill="none" />
+    <path d="M28 26 L16 20 M28 26 L40 30" stroke="#F48FB1" strokeWidth="4" strokeLinecap="round" />
+    <path d="M46 12 L46 26 M46 12 L54 14 L54 22" stroke="#7E57C2" strokeWidth="3" strokeLinecap="round" fill="none" />
+    <circle cx="43" cy="27" r="4" fill="#B39DDB" />
+    <circle cx="51" cy="23" r="4" fill="#B39DDB" />
+  </svg>
+)

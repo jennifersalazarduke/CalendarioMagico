@@ -40,6 +40,20 @@ export const availableActivities: Omit<Activity, "completed">[] = [
   { id: "act-28", nameEs: "Dar de comer al gato", nameEn: "Feed the cat", icon: "cat" },
   { id: "act-29", nameEs: "Regar las plantas", nameEn: "Water the plants", icon: "plant" },
   { id: "act-30", nameEs: "Guardar la mochila", nameEn: "Put away backpack", icon: "backpack" },
+  // Body & health
+  { id: "act-31", nameEs: "Hacer deporte", nameEn: "Do sports", icon: "sports" },
+  { id: "act-32", nameEs: "Tomar las vitaminas", nameEn: "Take your vitamins", icon: "vitamins" },
+  { id: "act-33", nameEs: "Lavarse la cara", nameEn: "Wash your face", icon: "wash-face" },
+  // Learning & home
+  { id: "act-34", nameEs: "Practicar inglés", nameEn: "Practice English", icon: "english" },
+  { id: "act-35", nameEs: "Practicar lectura", nameEn: "Practice reading", icon: "reading" },
+  { id: "act-36", nameEs: "Practicar escritura", nameEn: "Practice writing", icon: "writing" },
+  { id: "act-37", nameEs: "Ayudar a poner la mesa", nameEn: "Help set the table", icon: "table" },
+  { id: "act-38", nameEs: "Pintar o dibujar", nameEn: "Paint or draw", icon: "paint" },
+  // Night & feelings
+  { id: "act-39", nameEs: "Cuento antes de dormir", nameEn: "Bedtime story", icon: "story" },
+  { id: "act-40", nameEs: "Abrazo de buenas noches", nameEn: "Goodnight hug", icon: "hug" },
+  { id: "act-41", nameEs: "Bailar o cantar", nameEn: "Dance or sing", icon: "dance" },
 ]
 
 interface SettingsPanelProps {
