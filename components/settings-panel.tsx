@@ -108,6 +108,17 @@ export function SettingsPanel({
     a.id === preset.id || a.nameEs === preset.nameEs || a.name === preset.nameEs
 
   const toggleActivityInRoutine = (routineId: string, activity: Omit<Activity, "completed">) => {
+    // Al quitar una actividad se borra tambien su historial (cascade en la base).
+    // Confirmar antes para evitar perder progreso por un toque accidental.
+    const target = routines.find((r) => r.id === routineId)
+    const isRemoval = target?.activities.some((a) => matchesActivity(a, activity)) ?? false
+    if (isRemoval) {
+      const ok = window.confirm(
+        `¿Quitar "${activity.nameEs}" de la rutina?\n\nSe borrará también su historial de días completados.`
+      )
+      if (!ok) return
+    }
+
     const newRoutines = routines.map((routine) => {
       if (routine.id !== routineId) return routine
 

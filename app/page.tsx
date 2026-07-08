@@ -90,9 +90,11 @@ function CalendarioContent() {
       if (allComplete && total > 0) {
         setCelebrationType("day")
         setBonusTokens(10)
+        await data.awardBonus(10, "day_bonus")
       } else if (allRoutineComplete) {
         setCelebrationType("routine")
         setBonusTokens(3)
+        await data.awardBonus(3, "routine_bonus")
       } else {
         setCelebrationType("activity")
         setBonusTokens(0)
@@ -271,7 +273,7 @@ function CalendarioContent() {
             weeklyProgress={weeklyForResumen}
             dayNames={dayNames}
             currentDayIndex={getDayOfWeek()}
-            onResetWeek={() => {}}
+            onResetWeek={data.resetWeek}
           />
         )}
 

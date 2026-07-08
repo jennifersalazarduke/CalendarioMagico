@@ -251,6 +251,29 @@ export function useSupabaseData() {
     await loadAll()
   }, [activeChild, tokenBalance, supabase, loadAll])
 
+  const resetWeek = useCallback(async () => {
+    if (!activeChild) return
+    const dates = getWeekDates()
+    const { error } = await supabase.from("completions").delete()
+      .eq("child_id", activeChild.id)
+      .gte("completed_date", dates[0])
+      .lte("completed_date", dates[6])
+    if (error) console.error("resetWeek:", error.message)
+    await loadAll()
+  }, [activeChild, supabase, loadAll])
+
+  const awardBonus = useCallback(async (amount: number, reason: "routine_bonus" | "day_bonus") => {
+    if (!activeChild) return
+    const { error } = await supabase.from("token_transactions").insert({
+      child_id: activeChild.id,
+      amount,
+      reason,
+      reference_id: null,
+    })
+    if (error) console.error("awardBonus:", error.message)
+    await loadAll()
+  }, [activeChild, supabase, loadAll])
+
   const resetAllData = useCallback(async () => {
     if (!activeChild) return
     await supabase.from("completions").delete().eq("child_id", activeChild.id)
@@ -343,6 +366,8 @@ export function useSupabaseData() {
     updateChildName,
     updateChildTheme,
     resetTokens,
+    resetWeek,
+    awardBonus,
     resetAllData,
     refreshData: loadAll,
     today,
