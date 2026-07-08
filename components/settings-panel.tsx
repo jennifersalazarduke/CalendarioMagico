@@ -84,17 +84,22 @@ export function SettingsPanel({
     }
   }
 
+  // Las actividades guardadas tienen UUID de Supabase, los presets tienen id "act-X".
+  // Por eso el match es por id O por nombre en español (nameEs o name según el origen).
+  const matchesActivity = (a: { id: string; nameEs?: string; name?: string }, preset: Omit<Activity, "completed">) =>
+    a.id === preset.id || a.nameEs === preset.nameEs || a.name === preset.nameEs
+
   const toggleActivityInRoutine = (routineId: string, activity: Omit<Activity, "completed">) => {
     const newRoutines = routines.map((routine) => {
       if (routine.id !== routineId) return routine
 
-      const existingIndex = routine.activities.findIndex((a) => a.id === activity.id)
-      
+      const existingIndex = routine.activities.findIndex((a) => matchesActivity(a, activity))
+
       if (existingIndex >= 0) {
         // Remove activity
         return {
           ...routine,
-          activities: routine.activities.filter((a) => a.id !== activity.id),
+          activities: routine.activities.filter((a) => !matchesActivity(a, activity)),
         }
       } else {
         // Add activity
@@ -104,13 +109,13 @@ export function SettingsPanel({
         }
       }
     })
-    
+
     onRoutinesChange(newRoutines)
   }
 
-  const isActivityInRoutine = (routineId: string, activityId: string) => {
+  const isActivityInRoutine = (routineId: string, activity: Omit<Activity, "completed">) => {
     const routine = routines.find((r) => r.id === routineId)
-    return routine?.activities.some((a) => a.id === activityId) ?? false
+    return routine?.activities.some((a) => matchesActivity(a, activity)) ?? false
   }
 
   const moveActivityUp = (routineId: string, activityIndex: number) => {
@@ -436,7 +441,7 @@ export function SettingsPanel({
                           /* Add mode - show all available activities */
                           <div className="grid grid-cols-1 gap-2">
                             {availableActivities.map((activity) => {
-                              const isSelected = isActivityInRoutine(routine.id, activity.id)
+                              const isSelected = isActivityInRoutine(routine.id, activity)
                               const IconComponent = getActivityIcon(activity.icon)
                               
                               return (

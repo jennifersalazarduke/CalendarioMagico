@@ -9,6 +9,7 @@ import type { Routine, DbActivity, Completion, TokenTransaction, DbReward, Redem
 export interface Activity {
   id: string
   name: string
+  nameEn: string
   icon: string
   completed: boolean
   completedDate?: string
@@ -128,6 +129,7 @@ export function useSupabaseData() {
       activities: acts.map(a => ({
         id: a.id,
         name: a.name_es,
+        nameEn: a.name_en,
         icon: a.icon,
         completed: completions.some(c => c.activity_id === a.id && c.completed_date === today),
         completedDate: completions.find(c => c.activity_id === a.id && c.completed_date === today)?.completed_date,
@@ -253,7 +255,7 @@ export function useSupabaseData() {
     await loadAll()
   }, [activeChild, routines, supabase, loadAll])
 
-  const addActivity = useCallback(async (routineBlockId: string, name: string, icon: string) => {
+  const addActivity = useCallback(async (routineBlockId: string, name: string, icon: string, nameEn?: string) => {
     const routine = routines.find(r => r.block_id === routineBlockId)
     if (!routine) return
 
@@ -262,13 +264,26 @@ export function useSupabaseData() {
     await supabase.from("activities").insert({
       routine_id: routine.id,
       name_es: name,
-      name_en: name,
+      name_en: nameEn || name,
       icon,
       sort_order: maxOrder,
     })
 
     await loadAll()
   }, [routines, activities, supabase, loadAll])
+
+  const updateActivityOrder = useCallback(async (routineBlockId: string, orderedActivityIds: string[]) => {
+    const routine = routines.find(r => r.block_id === routineBlockId)
+    if (!routine) return
+
+    await Promise.all(
+      orderedActivityIds.map((id, index) =>
+        supabase.from("activities").update({ sort_order: index }).eq("id", id).eq("routine_id", routine.id)
+      )
+    )
+
+    await loadAll()
+  }, [routines, supabase, loadAll])
 
   const removeActivity = useCallback(async (activityId: string) => {
     await supabase.from("activities").delete().eq("id", activityId)
@@ -302,6 +317,7 @@ export function useSupabaseData() {
     subtractTokens,
     addActivity,
     removeActivity,
+    updateActivityOrder,
     addReward,
     removeReward,
     updateChildName,

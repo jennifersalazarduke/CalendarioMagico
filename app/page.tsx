@@ -12,6 +12,7 @@ import { CelebrationModal } from "@/components/celebration-modal"
 import { RobotMascota } from "@/components/robot-mascota"
 import { SettingsPanel } from "@/components/settings-panel"
 import { ConsecuenciasTab } from "@/components/consecuencias-tab"
+import { availableActivities } from "@/components/settings-panel"
 import type { RoutineBlock as RoutineBlockType } from "@/hooks/use-supabase-data"
 
 // Re-export types for backward compatibility with child components
@@ -35,6 +36,15 @@ export interface Reward {
 }
 
 const dayNames = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+
+// Traducciones EN por nombre ES del catálogo de presets.
+// Rescata la traducción de actividades guardadas antes del fix de name_en.
+const EN_BY_ES = new Map(availableActivities.map(a => [a.nameEs, a.nameEn]))
+
+function resolveNameEn(nameEs: string, storedEn?: string): string {
+  if (storedEn && storedEn !== nameEs) return storedEn
+  return EN_BY_ES.get(nameEs) ?? nameEs
+}
 
 function getDayOfWeek(): number {
   const day = new Date().getDay()
@@ -101,10 +111,19 @@ function CalendarioContent() {
       const currentIds = new Set(current.activities.map(a => a.id))
       const newIds = new Set(newRoutine.activities.map(a => a.id))
 
+      // Mismo conjunto de actividades pero en otro orden → persistir sort_order
+      const sameSet = currentIds.size === newIds.size && [...currentIds].every(id => newIds.has(id))
+      const orderChanged = current.activities.map(a => a.id).join("|") !== newRoutine.activities.map(a => a.id).join("|")
+      if (sameSet && orderChanged) {
+        await data.updateActivityOrder(newRoutine.id, newRoutine.activities.map(a => a.id))
+        continue
+      }
+
       for (const act of newRoutine.activities) {
         if (!currentIds.has(act.id)) {
-          const actAny = act as typeof act & { nameEs?: string }
-          await data.addActivity(newRoutine.id, actAny.nameEs ?? act.name, act.icon)
+          const actAny = act as typeof act & { nameEs?: string; nameEn?: string }
+          const nameEs = actAny.nameEs ?? act.name
+          await data.addActivity(newRoutine.id, nameEs, act.icon, resolveNameEn(nameEs, actAny.nameEn))
         }
       }
 
@@ -137,7 +156,7 @@ function CalendarioContent() {
     activities: r.activities.map(a => ({
       ...a,
       nameEs: a.name,
-      nameEn: a.name,
+      nameEn: resolveNameEn(a.name, a.nameEn),
     })),
   }))
 
@@ -287,7 +306,7 @@ function CalendarioContent() {
         onThemeChange={data.updateChildTheme}
         routines={data.routineBlocks.map(r => ({
           ...r,
-          activities: r.activities.map(a => ({ ...a, nameEs: a.name, nameEn: a.name })),
+          activities: r.activities.map(a => ({ ...a, nameEs: a.name, nameEn: resolveNameEn(a.name, a.nameEn) })),
         }))}
         onRoutinesChange={handleRoutinesChange}
         tokens={data.tokenBalance}
