@@ -96,6 +96,7 @@ export function useSupabaseData() {
     const rtnData = routinesRes.data || []
     setRoutines(rtnData)
     setRewards(rewardsRes.data || [])
+    if (balanceRes.error) console.error("get_token_balance:", balanceRes.error.message)
     setTokenBalance(balanceRes.data ?? 0)
     setCompletions(completionsRes.data || [])
 
@@ -172,19 +173,21 @@ export function useSupabaseData() {
     const existing = completions.find(c => c.activity_id === activityId && c.completed_date === today)
     if (existing) return
 
-    await supabase.from("completions").insert({
+    const { error: cErr } = await supabase.from("completions").insert({
       child_id: activeChild.id,
       activity_id: activityId,
       completed_date: today,
       tokens_earned: tokens,
     })
+    if (cErr) console.error("completeActivity/completion:", cErr.message)
 
-    await supabase.from("token_transactions").insert({
+    const { error: tErr } = await supabase.from("token_transactions").insert({
       child_id: activeChild.id,
       amount: tokens,
       reason: "activity",
       reference_id: activityId,
     })
+    if (tErr) console.error("completeActivity/transaction:", tErr.message)
 
     await loadAll()
   }, [activeChild, completions, today, supabase, loadAll])
@@ -208,15 +211,17 @@ export function useSupabaseData() {
     await loadAll()
   }, [activeChild, tokenBalance, supabase, loadAll])
 
-  const subtractTokens = useCallback(async (amount: number, reason: string) => {
+  const subtractTokens = useCallback(async (amount: number, _reason: string) => {
     if (!activeChild) return
 
-    await supabase.from("token_transactions").insert({
+    // reference_id es uuid en la base — un texto como "manual" hace fallar el insert
+    const { error } = await supabase.from("token_transactions").insert({
       child_id: activeChild.id,
       amount: -amount,
       reason: "consequence",
-      reference_id: reason,
+      reference_id: null,
     })
+    if (error) console.error("subtractTokens:", error.message)
 
     await loadAll()
   }, [activeChild, supabase, loadAll])
@@ -235,12 +240,14 @@ export function useSupabaseData() {
 
   const resetTokens = useCallback(async () => {
     if (!activeChild || tokenBalance === 0) return
-    await supabase.from("token_transactions").insert({
+    // reference_id es uuid en la base — el texto "reset" hacía fallar el insert
+    const { error } = await supabase.from("token_transactions").insert({
       child_id: activeChild.id,
       amount: -tokenBalance,
       reason: "consequence",
-      reference_id: "reset",
+      reference_id: null,
     })
+    if (error) console.error("resetTokens:", error.message)
     await loadAll()
   }, [activeChild, tokenBalance, supabase, loadAll])
 
