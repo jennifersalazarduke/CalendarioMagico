@@ -47,7 +47,11 @@ function resolveNameEn(nameEs: string, storedEn?: string): string {
 }
 
 function getDayOfWeek(): number {
-  const day = new Date().getDay()
+  // Día de la semana en hora de Bogotá (0 = lunes … 6 = domingo),
+  // consistente con getWeekDates() del hook.
+  const ymd = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota" }).format(new Date())
+  const [y, m, d] = ymd.split("-").map(Number)
+  const day = new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay()
   return day === 0 ? 6 : day - 1
 }
 

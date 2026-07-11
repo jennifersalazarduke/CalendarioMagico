@@ -40,19 +40,32 @@ export interface Reward {
   isActive: boolean
 }
 
+// Colombia no tiene horario de verano: siempre UTC-5.
+// Calculamos el "día" en hora de Bogotá para que el calendario cambie a la
+// medianoche local (no a las 7pm, que es lo que pasaba usando UTC).
+const TZ = "America/Bogota"
+
+// "en-CA" formatea como YYYY-MM-DD, ya en la zona indicada.
+function bogotaYMD(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(date)
+}
+
 function getToday() {
-  return new Date().toISOString().split("T")[0]
+  return bogotaYMD()
 }
 
 function getWeekDates() {
-  const now = new Date()
-  const day = now.getDay()
-  const monday = new Date(now)
-  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1))
+  const [y, m, d] = bogotaYMD().split("-").map(Number)
+  // Anclamos al mediodía UTC del día local para que la aritmética de fechas
+  // no cruce ningún límite de día por el offset.
+  const anchor = new Date(Date.UTC(y, m - 1, d, 12))
+  const day = anchor.getUTCDay()
+  const monday = new Date(anchor)
+  monday.setUTCDate(anchor.getUTCDate() - (day === 0 ? 6 : day - 1))
   return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(monday)
-    d.setDate(monday.getDate() + i)
-    return d.toISOString().split("T")[0]
+    const dt = new Date(monday)
+    dt.setUTCDate(monday.getUTCDate() + i)
+    return dt.toISOString().split("T")[0]
   })
 }
 
